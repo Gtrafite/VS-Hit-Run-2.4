@@ -14,9 +14,9 @@ plugins {
 }
 
 // Determine the version
-String platform = String.valueOf(loader_platform).toLowerCase()
+// String platform = String.valueOf(loader_platform).toLowerCase()
 
-version = minecraft_version + "-" + platform + "-" + mod_version
+// version = minecraft_version + "-" + platform + "-" + mod_version
 
 architectury {
     minecraft = rootProject.minecraft_version
@@ -87,8 +87,10 @@ allprojects {
     apply plugin: "architectury-plugin"
     apply plugin: "maven-publish"
 
-    archivesBaseName = rootProject.archives_base_name
-    version = rootProject.version
+    String platform = String.valueOf(loader_platform).toLowerCase()
+    archivesBaseName = rootProject.archives_base_name + "-" + minecraft_version + "-" + platform + "-" + mod_version
+    // archivesBaseName = rootProject.archives_base_name
+    // version = minecraft_version + "-" + platform + "-" + mod_version
     group = rootProject.maven_group
 
     repositories {

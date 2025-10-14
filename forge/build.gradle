@@ -15,7 +15,7 @@ plugins {
     id "com.modrinth.minotaur"
 }
 
-apply from: '../gradle-scripts/publish-curseforge.gradle'
+apply from: '../gradle-scripts/publish-modrinth.gradle'
 
 architectury {
     platformSetupLoomIde()
@@ -27,8 +27,8 @@ loom {
 
     forge {
         convertAccessWideners = true
-        mixinConfig "vs_addon_template.mixins.json"
-        mixinConfig "vs_addon_template-common.mixins.json"
+        mixinConfig "vs_hitnrun.mixins.json"
+        mixinConfig "vs_hitnrun-common.mixins.json"
         extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
     }
 }
@@ -37,27 +37,25 @@ configurations {
     common
     shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
     compileClasspath.extendsFrom common
-            runtimeClasspath.extendsFrom common
-            developmentForge.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentForge.extendsFrom common
 }
 
 dependencies {
     forge "net.minecraftforge:forge:$forge_version"
 
-    // Architectury API
-    include(modApi "dev.architectury:architectury-forge:${rootProject.architectury_version}")
+    compileOnly("io.github.llamalad7:mixinextras-common:${mixin_extras_version}")
+    annotationProcessor(implementation(include("io.github.llamalad7:mixinextras-forge:${mixin_extras_version}")))
 
     // Valkyrien Skies 2
-    modApi("org.valkyrienskies:valkyrienskies-120-forge:$vs2_version") { transitive = false }
-
-    // VS Core
+    modImplementation("org.valkyrienskies:valkyrienskies-120-forge:$vs2_version") { transitive = false }
     implementation("org.valkyrienskies.core:api:$vs_core_version")
     implementation("org.valkyrienskies.core:api-game:$vs_core_version")
     implementation("org.valkyrienskies.core:util:$vs_core_version")
     implementation("org.valkyrienskies.core:impl:$vs_core_version")
 
     // VS needs Kotlin For Forge, even though we don't
-    implementation "thedarkcolour:kotlinforforge:$kff_version"
+    localRuntime "thedarkcolour:kotlinforforge:$kff_version"
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
@@ -90,7 +88,7 @@ shadowJar {
 
 remapJar {
     input.set shadowJar.archiveFile
-            dependsOn shadowJar
+    dependsOn shadowJar
     archiveClassifier.set null
 }
 
@@ -101,7 +99,7 @@ jar {
 sourcesJar {
     def commonSources = project(":common").sourcesJar
     dependsOn commonSources
-            from commonSources.archiveFile.map { zipTree(it) }
+    from commonSources.archiveFile.map { zipTree(it) }
 }
 
 components.java {
@@ -113,36 +111,10 @@ components.java {
 publishing {
     publications {
         mavenCommon(MavenPublication) {
-            groupId = "org.valkyrienskies.eureka"
+            groupId = "io.github.kawaiicakes.vs_hitnrun"
             version = project.version
             artifactId = rootProject.archives_base_name + "-" + project.name
             from components.java
-        }
-    }
-
-    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-    repositories {
-        if (project.vs_maven_username && project.vs_maven_password) {
-            println "Publishing to VS Maven"
-            maven {
-                url = project.vs_maven_url
-                credentials {
-                    username = project.vs_maven_username
-                    password = project.vs_maven_password
-                }
-            }
-        }
-        // Add repositories to publish to here.
-        if (System.getenv("GITHUB_ACTOR") != null) {
-            println "Publishing to Github Packages"
-            maven {
-                name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/ValkyrienSkies/Eureka")
-                credentials {
-                    username = System.getenv("GITHUB_ACTOR")
-                    password = System.getenv("GITHUB_TOKEN")
-                }
-            }
         }
     }
 }

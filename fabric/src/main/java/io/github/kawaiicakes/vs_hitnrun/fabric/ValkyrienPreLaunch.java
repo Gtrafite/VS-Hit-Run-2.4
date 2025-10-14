@@ -1,4 +1,4 @@
-package io.github.techtastic.vs_addon_template.fabric;
+package io.github.kawaiicakes.vs_hitnrun.fabric;
 
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 
