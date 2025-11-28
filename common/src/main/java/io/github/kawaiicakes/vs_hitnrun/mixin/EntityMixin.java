@@ -37,12 +37,10 @@ public abstract class EntityMixin implements Roadkillable {
             ServerLevel serverLevel, Vec3 deltaV, double deltaVMagnitudeSqr, EntityDraggingInformation info
     ) {
         final double convertedSpeed = Math.sqrt(deltaVMagnitudeSqr) * 20;
-        LogUtils.getLogger().info("Bonked! {} m/s", convertedSpeed);
-
-        // TODO - take into account config and mass. Using the speed like this is a debug convenience
+        // TODO - (1.1.c) take into account config and mass. Using the speed like this is a debug convenience
         final double thresholdSpeed = (convertedSpeed / 7.61);
 
-        // FIXME - for a spinning object, the added movement can sometimes be different to what one
+        // FIXME - (1.1.a) for a spinning object, the added movement can sometimes be different to what one
         //  would expect as it's simply just the expected future position of an entity while being dragged.
         //  this causes knockback to sometimes be applied in a direction opposite to what is expected
         final Vec3 added = VectorConversionsMCKt.toMinecraft(info.getAddedMovementLastTick());
@@ -61,7 +59,7 @@ public abstract class EntityMixin implements Roadkillable {
                 (float) thresholdSpeed, 1.0f
         );
 
-        // TODO - custom damage source, damage calculation
+        // TODO - (1.1.b) custom damage source, damage calculation
         this.hurt(this.damageSources().fall(), (float) (thresholdSpeed * 3));
 
         serverLevel.sendParticles(

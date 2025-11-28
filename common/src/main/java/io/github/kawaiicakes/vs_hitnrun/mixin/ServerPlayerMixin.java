@@ -1,14 +1,16 @@
 package io.github.kawaiicakes.vs_hitnrun.mixin;
 
-import com.mojang.logging.LogUtils;
+import com.mojang.authlib.GameProfile;
 import io.github.kawaiicakes.vs_hitnrun.mixinterface.Roadkillable;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
@@ -19,17 +21,17 @@ import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
-@Mixin(LivingEntity.class)
-public abstract class LivingEntityMixin extends Entity implements Roadkillable {
-    @Shadow public abstract void knockback(double strength, double x, double z);
-
-    @Shadow public abstract float getHealth();
+@Mixin(ServerPlayer.class)
+public abstract class ServerPlayerMixin extends Player implements Roadkillable {
+    @Shadow public ServerGamePacketListenerImpl connection;
 
     @Override
     @ParametersAreNonnullByDefault
     public void vs_hitnrun$onRoadkill(
             ServerLevel serverLevel, Vec3 deltaV, double deltaVMagnitudeSqr, EntityDraggingInformation info
     ) {
+        final Vec3 deltaMovement = this.getDeltaMovement();
+
         final double convertedSpeed = Math.sqrt(deltaVMagnitudeSqr) * 20;
         // TODO - (1.1.c)
         final double thresholdSpeed = (convertedSpeed / 7.61);
@@ -48,6 +50,12 @@ public abstract class LivingEntityMixin extends Entity implements Roadkillable {
         // TODO - (1.1.b)
         final boolean wasHurt = this.hurt(this.damageSources().fall(), (float) (thresholdSpeed * 3));
         final float newHealth = this.getHealth();
+
+        if (this.hurtMarked) {
+            this.connection.send(new ClientboundSetEntityMotionPacket(this));
+            this.hurtMarked = false;
+            this.setDeltaMovement(deltaMovement);
+        }
 
         if (!wasHurt) {
             serverLevel.playSound(
@@ -75,7 +83,7 @@ public abstract class LivingEntityMixin extends Entity implements Roadkillable {
         );
     }
 
-    private LivingEntityMixin(EntityType<?> entityType, Level level) {
-        super(entityType, level);
+    private ServerPlayerMixin(Level level, BlockPos pos, float yRot, GameProfile gameProfile) {
+        super(level, pos, yRot, gameProfile);
     }
 }
