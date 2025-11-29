@@ -1,1 +1,2 @@
 accessWidener   v2  named
+accessible  field   net/minecraft/world/damagesource/DamageSources  damageTypes Lnet/minecraft/core/Registry;

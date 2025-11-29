@@ -1,11 +1,12 @@
 package io.github.kawaiicakes.vs_hitnrun.mixin;
 
-import com.mojang.logging.LogUtils;
+import io.github.kawaiicakes.vs_hitnrun.VSHitNRun;
 import io.github.kawaiicakes.vs_hitnrun.mixinterface.Roadkillable;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -14,10 +15,13 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.valkyrienskies.core.api.ships.ServerShip;
+import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import org.valkyrienskies.mod.common.util.EntityDraggingInformation;
 import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.function.Supplier;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity implements Roadkillable {
@@ -44,9 +48,20 @@ public abstract class LivingEntityMixin extends Entity implements Roadkillable {
                 -Mth.cos(yRotFromDeltaV * ((float)Math.PI / 180))
         );
 
+        //noinspection DataFlowIssue
+        final double mass = ((ServerShip) VSGameUtilsKt.getAllShips(serverLevel).getById(info.getLastShipStoodOn()))
+                .getInertiaData()
+                .getMass();
+
         final float oldHealth = this.getHealth();
-        // TODO - (1.1.b)
-        final boolean wasHurt = this.hurt(this.damageSources().fall(), (float) (thresholdSpeed * 3));
+        final Supplier<DamageSource> function = added.horizontalDistanceSqr() < added.y * added.y
+                ? () -> VSHitNRun.crushed(this.damageSources(), (float) mass)
+                : () -> VSHitNRun.rammed(this.damageSources(), added, (float) mass);
+        // TODO - (1.1.a)
+        final boolean wasHurt = this.hurt(
+                function.get(),
+                (float) (thresholdSpeed * 3)
+        );
         final float newHealth = this.getHealth();
 
         if (!wasHurt) {

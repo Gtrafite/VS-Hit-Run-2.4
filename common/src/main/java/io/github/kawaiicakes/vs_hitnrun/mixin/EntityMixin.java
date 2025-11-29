@@ -1,6 +1,6 @@
 package io.github.kawaiicakes.vs_hitnrun.mixin;
 
-import com.mojang.logging.LogUtils;
+import io.github.kawaiicakes.vs_hitnrun.VSHitNRun;
 import io.github.kawaiicakes.vs_hitnrun.mixinterface.Roadkillable;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -14,14 +14,16 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.valkyrienskies.core.api.ships.ServerShip;
+import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import org.valkyrienskies.mod.common.util.EntityDraggingInformation;
 import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.function.Supplier;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin implements Roadkillable {
-    @Shadow public abstract float getYRot();
     @Shadow public abstract void push(double x, double y, double z);
     @Shadow public abstract double getY();
     @Shadow public abstract double getY(double scale);
@@ -59,8 +61,16 @@ public abstract class EntityMixin implements Roadkillable {
                 (float) thresholdSpeed, 1.0f
         );
 
-        // TODO - (1.1.b) custom damage source, damage calculation
-        this.hurt(this.damageSources().fall(), (float) (thresholdSpeed * 3));
+        //noinspection DataFlowIssue
+        final double mass = ((ServerShip) VSGameUtilsKt.getAllShips(serverLevel).getById(info.getLastShipStoodOn()))
+                .getInertiaData()
+                .getMass();
+
+        final Supplier<DamageSource> function = added.horizontalDistanceSqr() < added.y * added.y
+                ? () -> VSHitNRun.crushed(this.damageSources(), (float) mass)
+                : () -> VSHitNRun.rammed(this.damageSources(), added, (float) mass);
+        // TODO - (1.1.a)
+        this.hurt(function.get(), (float) (thresholdSpeed * 3));
 
         serverLevel.sendParticles(
                 ParticleTypes.DAMAGE_INDICATOR,
