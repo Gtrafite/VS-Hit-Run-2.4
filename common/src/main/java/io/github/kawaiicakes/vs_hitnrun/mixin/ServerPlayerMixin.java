@@ -68,7 +68,7 @@ public abstract class ServerPlayerMixin extends Player implements Roadkillable {
 
         double rawDamage = damageCoefficient * 0.5 * mass * (deltaVMagnitudeSqr * 400);
         if (isCrushing) rawDamage *= crushingMultiplier;
-        final boolean wasHurt = this.hurt(function.get(), (float) Mth.clamp(
+        this.hurt(function.get(), (float) Mth.clamp(
                         rawDamage,
                         minDamage,
                         maxDamage
@@ -80,17 +80,6 @@ public abstract class ServerPlayerMixin extends Player implements Roadkillable {
             this.connection.send(new ClientboundSetEntityMotionPacket(this));
             this.hurtMarked = false;
             this.setDeltaMovement(deltaMovement);
-        }
-
-        if (!wasHurt) {
-            serverLevel.playSound(
-                    null,
-                    this.getX(), this.getY(), this.getZ(),
-                    SoundEvents.PLAYER_ATTACK_NODAMAGE, this.getSoundSource(),
-                    (float) Mth.clamp(rawDamage / 10, 0.5, 3.0), 1.0f
-            );
-
-            return;
         }
 
         serverLevel.playSound(
