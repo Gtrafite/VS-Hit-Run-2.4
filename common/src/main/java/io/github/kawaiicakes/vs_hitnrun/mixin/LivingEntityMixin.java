@@ -72,6 +72,9 @@ public abstract class LivingEntityMixin extends Entity implements Roadkillable {
                 )
         );
         final float newHealth = this.getHealth();
+        final float healthDiff = oldHealth - newHealth;
+
+        if (healthDiff <= 0) return;
 
         serverLevel.playSound(
                 null,
@@ -83,7 +86,7 @@ public abstract class LivingEntityMixin extends Entity implements Roadkillable {
         serverLevel.sendParticles(
                 ParticleTypes.DAMAGE_INDICATOR,
                 this.getX(), this.getY(0.5), this.getZ(),
-                (int) (oldHealth - newHealth) / 2,
+                (int) healthDiff / 2,
                 0.1, 0.0, 0.1, Mth.clamp(rawDamage / 20, 0.2, 1.0)
         );
     }

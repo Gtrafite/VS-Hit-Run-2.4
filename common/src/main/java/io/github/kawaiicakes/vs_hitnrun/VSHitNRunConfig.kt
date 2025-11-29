@@ -23,12 +23,12 @@ object VSHitNRunConfig {
         var massThreshold = 0.5
 
         @JsonSchema(
-            description = "Damage is calculated by the formula damageCoefficient * (1/2)(ship mass)(velocity)^2, where velocity is how much the player was moved as a result of being hit.",
+            description = "Damage is calculated by the formula damageCoefficient * (1/2)(ship mass)(velocity)^2, where velocity is how much the entity was moved as a result of being hit.",
             min = 0.0,
             max = 1.0,
-            defaultValue = "0.00004"
+            defaultValue = "0.00001122"
         )
-        var damageCoefficient = 0.00004
+        var damageCoefficient = 0.00001122
 
         @JsonSchema(
             description = "Minimum damage that can be inflicted by a ship.",
@@ -48,9 +48,9 @@ object VSHitNRunConfig {
             description = "Knockback is calculated by the formula knockbackCoefficient * (1/2)(ship mass)(velocity)^2, where velocity is how much the player was moved as a result of being hit.",
             min = 0.0,
             max = 1.0,
-            defaultValue = "0.00004"
+            defaultValue = "0.000003174"
         )
-        var knockbackCoefficient = 0.00004
+        var knockbackCoefficient = 0.000003174
 
         @JsonSchema(
             description = "Minimum knockback allowed. Number is roughly equivalent to knockback enchantment.",
@@ -66,8 +66,8 @@ object VSHitNRunConfig {
         )
         var maxKnockback = 5.0
 
-        @JsonSchema(description = "Damage multiplier for falling objects.", min = 0.0, defaultValue = "2.0")
-        var crushingMultiplier = 2.0
+        @JsonSchema(description = "Damage multiplier for falling objects.", min = 0.0, defaultValue = "5.6")
+        var crushingMultiplier = 5.6
     }
 }
 

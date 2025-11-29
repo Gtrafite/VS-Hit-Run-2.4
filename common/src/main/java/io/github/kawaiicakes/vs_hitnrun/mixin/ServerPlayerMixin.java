@@ -82,6 +82,10 @@ public abstract class ServerPlayerMixin extends Player implements Roadkillable {
             this.setDeltaMovement(deltaMovement);
         }
 
+        final float healthDiff = oldHealth - newHealth;
+
+        if (healthDiff <= 0) return;
+
         serverLevel.playSound(
                 null,
                 this.getX(), this.getY(), this.getZ(),

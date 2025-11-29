@@ -60,6 +60,9 @@ public abstract class EntityMixin implements Roadkillable {
                 Mth.cos(yRotFromDeltaV * ((float)Math.PI / 180)) * equivalentKnockbackLevel
         );
 
+        // FIXME - deltaV is not enough for adequate damage calculations. A spinning object would impart high deltaV, but
+        //  one that is super fast would not necessarily. Resolved via testing. Therefore, factor in ship velocity compared
+        //  to deltaV, or maybe even ditch deltaV and use omega and ship velocity.
         final boolean isCrushing = deltaV.horizontalDistanceSqr() < deltaV.y * deltaV.y;
 
         final Supplier<DamageSource> function = isCrushing
