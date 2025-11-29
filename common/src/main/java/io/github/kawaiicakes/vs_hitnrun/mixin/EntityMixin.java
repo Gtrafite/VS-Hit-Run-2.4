@@ -1,6 +1,7 @@
 package io.github.kawaiicakes.vs_hitnrun.mixin;
 
 import io.github.kawaiicakes.vs_hitnrun.VSHitNRun;
+import io.github.kawaiicakes.vs_hitnrun.VSHitNRunConfig;
 import io.github.kawaiicakes.vs_hitnrun.mixinterface.Roadkillable;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -34,14 +35,13 @@ public abstract class EntityMixin implements Roadkillable {
     public void vs_hitnrun$onRoadkill(
             ServerLevel serverLevel, Vec3 deltaV, double deltaVMagnitudeSqr, double mass, EntityDraggingInformation info
     ) {
-        // TODO - values from config
-        final double damageCoefficient = 1;
-        final double minDamage = 0;
-        final double maxDamage = Double.MAX_VALUE;
-        final double knockbackCoefficient = 1;
-        final double minKnockback = 0;
-        final double maxKnockback = Double.MAX_VALUE;
-        final double crushingMultiplier = 2;
+        final double damageCoefficient = VSHitNRunConfig.SERVER.getDamageCoefficient();
+        final double minDamage = VSHitNRunConfig.SERVER.getMinDamage();
+        final double maxDamage = VSHitNRunConfig.SERVER.getMaxDamage();
+        final double knockbackCoefficient = VSHitNRunConfig.SERVER.getKnockbackCoefficient();
+        final double minKnockback = VSHitNRunConfig.SERVER.getMinKnockback();
+        final double maxKnockback = VSHitNRunConfig.SERVER.getMaxKnockback();
+        final double crushingMultiplier = VSHitNRunConfig.SERVER.getCrushingMultiplier();
 
         // FIXME - (1.0.1.a) for a spinning object, the added movement can sometimes be different to what one
         //  would expect as it's simply just the expected future position of an entity while being dragged.

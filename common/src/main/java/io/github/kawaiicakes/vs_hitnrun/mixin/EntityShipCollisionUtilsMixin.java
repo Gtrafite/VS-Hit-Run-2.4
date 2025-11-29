@@ -2,6 +2,7 @@ package io.github.kawaiicakes.vs_hitnrun.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import io.github.kawaiicakes.vs_hitnrun.VSHitNRunConfig;
 import io.github.kawaiicakes.vs_hitnrun.mixinterface.Roadkillable;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -31,8 +32,7 @@ public abstract class EntityShipCollisionUtilsMixin {
 
         final Vec3 difference = result.subtract(movement);
         final double differenceMagnitudeSqr = difference.lengthSqr();
-        // TODO - config value
-        if (dragInfo.getLastShipStoodOn() != null && differenceMagnitudeSqr > 0.1269) {
+        if (dragInfo.getLastShipStoodOn() != null && differenceMagnitudeSqr > VSHitNRunConfig.SERVER.getSpeedThreshold()) {
             final ServerShip ship = ((ServerShip) VSGameUtilsKt.getAllShips(serverLevel).getById(
                     dragInfo.getLastShipStoodOn())
             );
@@ -40,6 +40,8 @@ public abstract class EntityShipCollisionUtilsMixin {
             if (ship == null) return result;
 
             final double mass = ship.getInertiaData().getMass();
+
+            if (mass < VSHitNRunConfig.SERVER.getMassThreshold()) return result;
 
             ((Roadkillable) (Object) entity).vs_hitnrun$onRoadkill(
                     serverLevel,

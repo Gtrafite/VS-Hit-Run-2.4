@@ -2,6 +2,7 @@ package io.github.kawaiicakes.vs_hitnrun.mixin;
 
 import com.mojang.authlib.GameProfile;
 import io.github.kawaiicakes.vs_hitnrun.VSHitNRun;
+import io.github.kawaiicakes.vs_hitnrun.VSHitNRunConfig;
 import io.github.kawaiicakes.vs_hitnrun.mixinterface.Roadkillable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -35,14 +36,13 @@ public abstract class ServerPlayerMixin extends Player implements Roadkillable {
     ) {
         final Vec3 deltaMovement = this.getDeltaMovement();
 
-        // TODO - values from config
-        final double damageCoefficient = 1;
-        final double minDamage = 0;
-        final double maxDamage = Double.MAX_VALUE;
-        final double knockbackCoefficient = 1;
-        final double minKnockback = 0;
-        final double maxKnockback = Double.MAX_VALUE;
-        final double crushingMultiplier = 2;
+        final double damageCoefficient = VSHitNRunConfig.SERVER.getDamageCoefficient();
+        final double minDamage = VSHitNRunConfig.SERVER.getMinDamage();
+        final double maxDamage = VSHitNRunConfig.SERVER.getMaxDamage();
+        final double knockbackCoefficient = VSHitNRunConfig.SERVER.getKnockbackCoefficient();
+        final double minKnockback = VSHitNRunConfig.SERVER.getMinKnockback();
+        final double maxKnockback = VSHitNRunConfig.SERVER.getMaxKnockback();
+        final double crushingMultiplier = VSHitNRunConfig.SERVER.getCrushingMultiplier();
 
         // FIXME - (1.0.1.a)
         final Vec3 added = VectorConversionsMCKt.toMinecraft(info.getAddedMovementLastTick());
