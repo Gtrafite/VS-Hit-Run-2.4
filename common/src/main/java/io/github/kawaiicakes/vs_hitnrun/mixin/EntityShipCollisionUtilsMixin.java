@@ -9,6 +9,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
+import org.valkyrienskies.core.api.ships.ServerShip;
+import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import org.valkyrienskies.mod.common.util.EntityDraggingInformation;
 import org.valkyrienskies.mod.common.util.EntityShipCollisionUtils;
 import org.valkyrienskies.mod.common.util.IEntityDraggingInformationProvider;
@@ -31,9 +33,17 @@ public abstract class EntityShipCollisionUtilsMixin {
         final double differenceMagnitudeSqr = difference.lengthSqr();
         // TODO - config value
         if (dragInfo.getLastShipStoodOn() != null && differenceMagnitudeSqr > 0.1269) {
+            final ServerShip ship = ((ServerShip) VSGameUtilsKt.getAllShips(serverLevel).getById(
+                    dragInfo.getLastShipStoodOn())
+            );
+
+            if (ship == null) return result;
+
+            final double mass = ship.getInertiaData().getMass();
+
             ((Roadkillable) (Object) entity).vs_hitnrun$onRoadkill(
                     serverLevel,
-                    difference, differenceMagnitudeSqr,
+                    difference, differenceMagnitudeSqr, mass,
                     dragInfo
             );
         }

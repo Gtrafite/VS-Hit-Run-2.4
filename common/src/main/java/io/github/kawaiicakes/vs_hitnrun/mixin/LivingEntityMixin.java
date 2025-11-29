@@ -15,8 +15,6 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.valkyrienskies.core.api.ships.ServerShip;
-import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import org.valkyrienskies.mod.common.util.EntityDraggingInformation;
 import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
 
@@ -32,35 +30,46 @@ public abstract class LivingEntityMixin extends Entity implements Roadkillable {
     @Override
     @ParametersAreNonnullByDefault
     public void vs_hitnrun$onRoadkill(
-            ServerLevel serverLevel, Vec3 deltaV, double deltaVMagnitudeSqr, EntityDraggingInformation info
+            ServerLevel serverLevel, Vec3 deltaV, double deltaVMagnitudeSqr, double mass, EntityDraggingInformation info
     ) {
-        final double convertedSpeed = Math.sqrt(deltaVMagnitudeSqr) * 20;
-        // TODO - (1.1.c)
-        final double thresholdSpeed = (convertedSpeed / 7.61);
+        // TODO - values from config
+        final double damageCoefficient = 1;
+        final double minDamage = 0;
+        final double maxDamage = Double.MAX_VALUE;
+        final double knockbackCoefficient = 1;
+        final double minKnockback = 0;
+        final double maxKnockback = Double.MAX_VALUE;
+        final double crushingMultiplier = 2;
 
-        // FIXME - (1.1.a)
+        // FIXME - (1.0.1.a)
         final Vec3 added = VectorConversionsMCKt.toMinecraft(info.getAddedMovementLastTick());
         final Vec2 normalizedDeltaV = new Vec2((float) added.x, (float) added.z).normalized();
         final float yRotFromDeltaV = (float) Mth.atan2(normalizedDeltaV.y, normalizedDeltaV.x);
+        final double equivalentKnockbackLevel = Mth.clamp(
+                knockbackCoefficient * 0.5 * mass * (deltaVMagnitudeSqr * 400),
+                minKnockback,
+                maxKnockback
+        );
         this.knockback(
-                thresholdSpeed * 1.2f,
+                equivalentKnockbackLevel * 1.2f,
                 Mth.sin(yRotFromDeltaV * ((float)Math.PI / 180)),
                 -Mth.cos(yRotFromDeltaV * ((float)Math.PI / 180))
         );
 
-        //noinspection DataFlowIssue
-        final double mass = ((ServerShip) VSGameUtilsKt.getAllShips(serverLevel).getById(info.getLastShipStoodOn()))
-                .getInertiaData()
-                .getMass();
-
         final float oldHealth = this.getHealth();
-        final Supplier<DamageSource> function = added.horizontalDistanceSqr() < added.y * added.y
+        final boolean isCrushing = deltaV.horizontalDistanceSqr() < deltaV.y * deltaV.y;
+
+        final Supplier<DamageSource> function = isCrushing
                 ? () -> VSHitNRun.crushed(this.damageSources(), (float) mass)
-                : () -> VSHitNRun.rammed(this.damageSources(), added, (float) mass);
-        // TODO - (1.1.a)
-        final boolean wasHurt = this.hurt(
-                function.get(),
-                (float) (thresholdSpeed * 3)
+                : () -> VSHitNRun.rammed(this.damageSources(), deltaV, (float) mass);
+
+        double rawDamage = damageCoefficient * 0.5 * mass * (deltaVMagnitudeSqr * 400);
+        if (isCrushing) rawDamage *= crushingMultiplier;
+        final boolean wasHurt = this.hurt(function.get(), (float) Mth.clamp(
+                        rawDamage,
+                        minDamage,
+                        maxDamage
+                )
         );
         final float newHealth = this.getHealth();
 
@@ -69,7 +78,7 @@ public abstract class LivingEntityMixin extends Entity implements Roadkillable {
                     null,
                     this.getX(), this.getY(), this.getZ(),
                     SoundEvents.PLAYER_ATTACK_NODAMAGE, this.getSoundSource(),
-                    (float) thresholdSpeed, 1.0f
+                    (float) Mth.clamp(rawDamage / 10, 0.5, 3.0), 1.0f
             );
 
             return;
@@ -79,14 +88,14 @@ public abstract class LivingEntityMixin extends Entity implements Roadkillable {
                 null,
                 this.getX(), this.getY(), this.getZ(),
                 SoundEvents.PLAYER_ATTACK_KNOCKBACK, this.getSoundSource(),
-                (float) thresholdSpeed, 1.0f
+                (float) Mth.clamp(rawDamage / 10, 0.5, 3.0), 1.0f
         );
 
         serverLevel.sendParticles(
                 ParticleTypes.DAMAGE_INDICATOR,
                 this.getX(), this.getY(0.5), this.getZ(),
                 (int) (oldHealth - newHealth) / 2,
-                0.1, 0.0, 0.1, 0.2
+                0.1, 0.0, 0.1, Mth.clamp(rawDamage / 20, 0.2, 1.0)
         );
     }
 

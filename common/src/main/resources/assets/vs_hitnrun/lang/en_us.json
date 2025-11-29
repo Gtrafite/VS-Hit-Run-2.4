@@ -1,6 +1,6 @@
 {
-  "death.attack.vs_hitnrun.rammed.light.slow": "%s died to a gust of wind",
-  "death.attack.vs_hitnrun.rammed.light.fast": "%s was killed by blunt force trauma",
+  "death.attack.vs_hitnrun.rammed.light.slow": "%s was lightly tapped",
+  "death.attack.vs_hitnrun.rammed.light.fast": "%s got shattered",
   "death.attack.vs_hitnrun.rammed.heavy.slow": "%s was steamrolled",
   "death.attack.vs_hitnrun.rammed.heavy.fast": "%s was turned into roadkill",
   "death.attack.vs_hitnrun.crushed.light": "%s was hit by a falling object",
