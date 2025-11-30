@@ -1,10 +1,10 @@
-package io.github.kawaiicakes.vs_hitnrun;
+package io.github.kawaiicakes.vs_hitnrun
 
 import com.github.imifou.jsonschema.module.addon.annotation.JsonSchema
 
 object VSHitNRunConfig {
     @JvmField
-    val SERVER = Server();
+    val SERVER = Server()
 
     class Server {
         @JsonSchema(
@@ -67,7 +67,10 @@ object VSHitNRunConfig {
         var maxKnockback = 5.0
 
         @JsonSchema(description = "Damage multiplier for falling objects.", min = 0.0, defaultValue = "5.6")
-        var crushingMultiplier = 5.6
+        var crushingMultiplier = 3.2
+
+        @JsonSchema(description = "If the entity's velocity contributes less than this percentage towards a collision velocity, damage is calculated.", min = 0.0, max = 1.0, defaultValue = "0.5")
+        var entityVelocityThreshold = 0.5
     }
 }
 

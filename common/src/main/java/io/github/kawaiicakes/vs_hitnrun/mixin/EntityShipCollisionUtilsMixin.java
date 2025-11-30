@@ -69,6 +69,12 @@ public abstract class EntityShipCollisionUtilsMixin {
                     ship.getVelocity(), ship.getOmega()
             );
 
+            // TODO - this should consider the entity's absolute velocity; assuming default config settings, if the
+            //  entity's velocity is contributing 60% of a collision, but the collision velocity is something like
+            //  30000 m/s, obviously damage should still be applied
+            if (movement.scale(VSHitNRunConfig.SERVER.getEntityVelocityThreshold()).lengthSqr() >= properDeltaV.lengthSqr())
+                return;
+
             ((Roadkillable) (Object) entity).vs_hitnrun$onRoadkill(
                     serverLevel, properDeltaV, mass, dragInfo
             );

@@ -40,11 +40,10 @@ public interface Roadkillable {
             List<ConvexPolygonc> collidingPolygons, Vec3 entityMovement,
             Vec3 shipCenterOfMassInWorld, Vector3dc shipVelocity, Vector3dc shipOmega
     ) {
-        // TODO - test and fix as needed
         int polygonCount = 0;
 
-        Vec3 velocity = VectorConversionsMCKt.toMinecraft(shipVelocity);
-        Vec3 omega = VectorConversionsMCKt.toMinecraft(shipOmega);
+        Vec3 velocity = VectorConversionsMCKt.toMinecraft(shipVelocity).scale(1.0 / 20.0);
+        Vec3 omega = VectorConversionsMCKt.toMinecraft(shipOmega).scale(1.0 / 20.0);
 
         Vec3 averagedCollisionCenter = new Vec3(0, 0, 0);
         Vec3 averagedCollisionNormal = new Vec3(0, 0, 0);
