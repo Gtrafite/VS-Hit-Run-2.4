@@ -33,7 +33,7 @@ public abstract class EntityMixin implements Roadkillable {
     @Override
     @ParametersAreNonnullByDefault
     public void vs_hitnrun$onRoadkill(
-            ServerLevel serverLevel, Vec3 deltaV, double deltaVMagnitudeSqr, double mass, EntityDraggingInformation info
+            ServerLevel serverLevel, Vec3 deltaV, double shipMass, EntityDraggingInformation info
     ) {
         final double damageCoefficient = VSHitNRunConfig.SERVER.getDamageCoefficient();
         final double minDamage = VSHitNRunConfig.SERVER.getMinDamage();
@@ -43,14 +43,11 @@ public abstract class EntityMixin implements Roadkillable {
         final double maxKnockback = VSHitNRunConfig.SERVER.getMaxKnockback();
         final double crushingMultiplier = VSHitNRunConfig.SERVER.getCrushingMultiplier();
 
-        // FIXME - (1.0.1.a) for a spinning object, the added movement can sometimes be different to what one
-        //  would expect as it's simply just the expected future position of an entity while being dragged.
-        //  this causes knockback to sometimes be applied in a direction opposite to what is expected
         final Vec3 added = VectorConversionsMCKt.toMinecraft(info.getAddedMovementLastTick());
         final Vec2 normalizedDeltaV = new Vec2((float) added.x, (float) added.z).normalized();
         final float yRotFromDeltaV = (float) Mth.atan2(normalizedDeltaV.y, normalizedDeltaV.x);
         final double equivalentKnockbackLevel = Mth.clamp(
-                knockbackCoefficient * 0.5 * mass * (deltaVMagnitudeSqr * 400),
+                knockbackCoefficient * 0.5 * shipMass * (deltaV.lengthSqr() * 400),
                 minKnockback,
                 maxKnockback
         );
@@ -60,16 +57,13 @@ public abstract class EntityMixin implements Roadkillable {
                 Mth.cos(yRotFromDeltaV * ((float)Math.PI / 180)) * equivalentKnockbackLevel
         );
 
-        // FIXME - deltaV is not enough for adequate damage calculations. A spinning object would impart high deltaV, but
-        //  one that is super fast would not necessarily. Resolved via testing. Therefore, factor in ship velocity compared
-        //  to deltaV, or maybe even ditch deltaV and use omega and ship velocity.
         final boolean isCrushing = deltaV.horizontalDistanceSqr() < deltaV.y * deltaV.y;
 
         final Supplier<DamageSource> function = isCrushing
-                ? () -> VSHitNRun.crushed(this.damageSources(), (float) mass)
-                : () -> VSHitNRun.rammed(this.damageSources(), deltaV, (float) mass);
+                ? () -> VSHitNRun.crushed(this.damageSources(), (float) shipMass)
+                : () -> VSHitNRun.rammed(this.damageSources(), deltaV, (float) shipMass);
 
-        double rawDamage = damageCoefficient * 0.5 * mass * (deltaVMagnitudeSqr * 400);
+        double rawDamage = damageCoefficient * 0.5 * shipMass * (deltaV.lengthSqr() * 400);
         if (isCrushing) rawDamage *= crushingMultiplier;
         this.hurt(function.get(), (float) Mth.clamp(
                 rawDamage,

@@ -32,7 +32,7 @@ public abstract class ServerPlayerMixin extends Player implements Roadkillable {
     @Override
     @ParametersAreNonnullByDefault
     public void vs_hitnrun$onRoadkill(
-            ServerLevel serverLevel, Vec3 deltaV, double deltaVMagnitudeSqr, double mass, EntityDraggingInformation info
+            ServerLevel serverLevel, Vec3 deltaV, double mass, EntityDraggingInformation info
     ) {
         final Vec3 deltaMovement = this.getDeltaMovement();
 
@@ -44,12 +44,11 @@ public abstract class ServerPlayerMixin extends Player implements Roadkillable {
         final double maxKnockback = VSHitNRunConfig.SERVER.getMaxKnockback();
         final double crushingMultiplier = VSHitNRunConfig.SERVER.getCrushingMultiplier();
 
-        // FIXME - (1.0.1.a)
         final Vec3 added = VectorConversionsMCKt.toMinecraft(info.getAddedMovementLastTick());
         final Vec2 normalizedDeltaV = new Vec2((float) added.x, (float) added.z).normalized();
         final float yRotFromDeltaV = (float) Mth.atan2(normalizedDeltaV.y, normalizedDeltaV.x);
         final double equivalentKnockbackLevel = Mth.clamp(
-                knockbackCoefficient * 0.5 * mass * (deltaVMagnitudeSqr * 400),
+                knockbackCoefficient * 0.5 * mass * (deltaV.lengthSqr() * 400),
                 minKnockback,
                 maxKnockback
         );
@@ -66,7 +65,7 @@ public abstract class ServerPlayerMixin extends Player implements Roadkillable {
                 ? () -> VSHitNRun.crushed(this.damageSources(), (float) mass)
                 : () -> VSHitNRun.rammed(this.damageSources(), deltaV, (float) mass);
 
-        double rawDamage = damageCoefficient * 0.5 * mass * (deltaVMagnitudeSqr * 400);
+        double rawDamage = damageCoefficient * 0.5 * mass * (deltaV.lengthSqr() * 400);
         if (isCrushing) rawDamage *= crushingMultiplier;
         this.hurt(function.get(), (float) Mth.clamp(
                         rawDamage,

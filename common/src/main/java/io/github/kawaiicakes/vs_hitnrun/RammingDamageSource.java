@@ -24,7 +24,7 @@ public class RammingDamageSource extends DamageSource {
 
     @Override
     public Component getLocalizedDeathMessage(LivingEntity livingEntity) {
-        // TODO (1.1.a)
+        // TODO (1.1.c)
         final String heavy = this.mass >= 4096 ? "heavy" : "light";
         final String fast = this.deltaV.lengthSqr() >= 0.25 ? "fast" : "slow";
 
