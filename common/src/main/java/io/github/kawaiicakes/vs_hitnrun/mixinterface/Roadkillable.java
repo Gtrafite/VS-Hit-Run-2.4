@@ -73,8 +73,8 @@ public interface Roadkillable {
         final Vec3 displacementFromCenterOfMass = averagedCollisionCenter.subtract(shipCenterOfMassInWorld);
         final Vec3 totalShipVelocity = omega.cross(displacementFromCenterOfMass).add(velocity);
 
-        final Vec3 collisionVelocity = totalShipVelocity.subtract(entityMovement);
+        final Vec3 collisionVelocityRaw = totalShipVelocity.subtract(entityMovement);
 
-        return averagedCollisionNormal.scale(collisionVelocity.dot(averagedCollisionNormal));
+        return collisionVelocityRaw.scale(collisionVelocityRaw.dot(averagedCollisionNormal));
     }
 }
