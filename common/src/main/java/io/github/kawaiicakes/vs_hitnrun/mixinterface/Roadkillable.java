@@ -2,9 +2,12 @@ package io.github.kawaiicakes.vs_hitnrun.mixinterface;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.valkyrienskies.core.apigame.collision.ConvexPolygonc;
 import org.valkyrienskies.mod.common.util.EntityDraggingInformation;
+import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
@@ -33,11 +36,45 @@ public interface Roadkillable {
      * @param shipOmega the angular velocity of the ship
      * @return A more accurate velocity representing the sum of the ship and entity's velocity at the point of contact.
      */
-    static Vec3 calculateProperCollisionVelocity(
+    static @NotNull Vec3 calculateProperCollisionVelocity(
             List<ConvexPolygonc> collidingPolygons, Vec3 entityMovement,
             Vec3 shipCenterOfMassInWorld, Vector3dc shipVelocity, Vector3dc shipOmega
     ) {
-        // TODO
-        return null;
+        // TODO - test and fix as needed
+        int polygonCount = 0;
+
+        Vec3 velocity = VectorConversionsMCKt.toMinecraft(shipVelocity);
+        Vec3 omega = VectorConversionsMCKt.toMinecraft(shipOmega);
+
+        Vec3 averagedCollisionCenter = new Vec3(0, 0, 0);
+        Vec3 averagedCollisionNormal = new Vec3(0, 0, 0);
+
+        for (ConvexPolygonc polygon : collidingPolygons) {
+            polygonCount++;
+
+            Vector3d centerOfPolygon = new Vector3d();
+            for (Vector3dc point : polygon.getPoints()) {
+                centerOfPolygon.add(point, centerOfPolygon);
+            }
+            centerOfPolygon.div(8);
+            averagedCollisionCenter = averagedCollisionCenter.add(VectorConversionsMCKt.toMinecraft(centerOfPolygon));
+
+            Vector3d normalToPolygonCenter = new Vector3d();
+            for (Vector3dc point : polygon.getNormals()) {
+                normalToPolygonCenter.add(point, normalToPolygonCenter);
+            }
+            normalToPolygonCenter.normalize();
+            averagedCollisionNormal = averagedCollisionNormal.add(VectorConversionsMCKt.toMinecraft(normalToPolygonCenter));
+        }
+
+        averagedCollisionCenter = averagedCollisionCenter.scale((double) 1 / polygonCount);
+        averagedCollisionNormal = averagedCollisionNormal.scale((double) 1 / polygonCount);
+
+        final Vec3 displacementFromCenterOfMass = averagedCollisionCenter.subtract(shipCenterOfMassInWorld);
+        final Vec3 totalShipVelocity = omega.cross(displacementFromCenterOfMass).add(velocity);
+
+        final Vec3 collisionVelocity = totalShipVelocity.subtract(entityMovement);
+
+        return averagedCollisionNormal.scale(collisionVelocity.dot(averagedCollisionNormal));
     }
 }
