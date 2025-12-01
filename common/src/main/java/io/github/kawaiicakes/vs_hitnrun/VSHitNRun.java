@@ -4,7 +4,6 @@ package io.github.kawaiicakes.vs_hitnrun;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.phys.Vec3;
-import org.valkyrienskies.core.impl.config_impl.VSConfigClassImpl;
 
 import static net.minecraft.world.damagesource.DamageTypes.FLY_INTO_WALL;
 
@@ -20,7 +19,7 @@ public class VSHitNRun {
     }
 
     public static void init() {
-        VSConfigClassImpl.Companion.registerConfig("vs_hitnrun", VSHitNRunConfig.class);
+        VSConfigClass.Companion.registerConfig("vs_hitnrun", VSHitNRunConfig.class);
     }
 
     public static void initClient() {}
