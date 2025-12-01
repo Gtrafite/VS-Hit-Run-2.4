@@ -4,6 +4,7 @@ package io.github.kawaiicakes.vs_hitnrun;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.phys.Vec3;
+import org.valkyrienskies.core.impl.config.VSConfigClass;
 
 import static net.minecraft.world.damagesource.DamageTypes.FLY_INTO_WALL;
 
