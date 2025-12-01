@@ -13,6 +13,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -62,9 +63,10 @@ public abstract class EntityShipCollisionUtilsMixin {
 
             Vec3 properDeltaV = Roadkillable.calculateProperCollisionVelocity(
                     polygons, movement,
-                    VectorConversionsMCKt.transformPosition(
-                            ship.getTransform().getShipToWorld(),
-                            VectorConversionsMCKt.toMinecraft(ship.getInertiaData().getCenterOfMassInShip())
+                    VectorConversionsMCKt.toMinecraft(
+                            ship.getShipToWorld().transformPosition(
+                                    (Vector3d) ship.getInertiaData().getCenterOfMassInShip()
+                            )
                     ),
                     ship.getVelocity(), ship.getOmega()
             );
