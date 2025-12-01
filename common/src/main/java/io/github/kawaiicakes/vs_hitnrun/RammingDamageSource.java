@@ -24,9 +24,8 @@ public class RammingDamageSource extends DamageSource {
 
     @Override
     public Component getLocalizedDeathMessage(LivingEntity livingEntity) {
-        // TODO (1.1.c)
-        final String heavy = this.mass >= 4096 ? "heavy" : "light";
-        final String fast = this.deltaV.lengthSqr() >= 0.25 ? "fast" : "slow";
+        final String heavy = this.mass >= VSHitNRunConfig.SERVER.getHeavyMass() ? "heavy" : "light";
+        final String fast = this.deltaV.lengthSqr() >= VSHitNRunConfig.SERVER.getFastShip() ? "fast" : "slow";
 
         return Component.translatable(
                 "death.attack.vs_hitnrun.rammed." + heavy + "." + fast,

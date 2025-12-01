@@ -21,8 +21,7 @@ public class CrushingDamageSource extends DamageSource {
 
     @Override
     public Component getLocalizedDeathMessage(LivingEntity livingEntity) {
-        // TODO (1.1.c)
-        final String crushed = this.mass >= 3000 ? "heavy" : "light";
+        final String crushed = this.mass >= VSHitNRunConfig.SERVER.getHeavyMass() ? "heavy" : "light";
 
         return Component.translatable("death.attack.vs_hitnrun.crushed." + crushed, livingEntity.getDisplayName());
     }

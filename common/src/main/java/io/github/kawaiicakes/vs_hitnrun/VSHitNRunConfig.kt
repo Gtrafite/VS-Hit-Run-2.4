@@ -71,6 +71,12 @@ object VSHitNRunConfig {
 
         @JsonSchema(description = "If the entity's velocity contributes less than this percentage towards a collision velocity, damage is calculated.", min = 0.0, max = 1.0, defaultValue = "0.5")
         var entityVelocityThreshold = 0.5
+
+        @JsonSchema(description = "The mass over which death messages will consider the ship heavy", min = 0.0, defaultValue = "4096")
+        var heavyMass = 4096
+
+        @JsonSchema(description = "The speed over which death messages will consider the ship fast (in m^2/t^2)", min = 0.0, defaultValue = "0.25")
+        var fastShip = 0.25
     }
 }
 
